@@ -1,0 +1,56 @@
+<html>
+
+<head>
+  <title>Webhooks App</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="javascript" href="/javascripts/notifications.js">
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+  var socket = io();
+  let visibleNotifications = 0;
+  socket.on('webhook', function(msg){
+    if(visibleNotifications < 5) {
+      visibleNotifications++;
+      addNotification(msg);
+    } else {
+      replaceNotification(msg);
+    }
+  });
+  fetch('/existing-notifications')
+  .then(function(response) {
+    return response.json();
+  })
+  .then(function(myJson) {
+    for (let notification of myJson) {
+      if(visibleNotifications < 5) {
+        visibleNotifications++;
+        addNotification(notification);
+      }
+    }
+  });
+  function addNotification(message) {
+    let text = document.createTextNode(message);
+    let notification = document.createElement("LI");
+    notification.appendChild(text);
+    document.getElementById('notifications').appendChild(notification);
+  }
+  function replaceNotification(message) {
+    let notificationToRemove = document.getElementById('notifications').children[0];
+    document.getElementById('notifications').removeChild(notificationToRemove);
+    addNotification(message);
+  }
+  </script>
+
+</head>
+
+<body>
+  <h1>Webhooks App</h1>
+  <p>
+    This is a super simple app intended to demonstrate how a developer might
+    work with the webhooks API. See below for webhooks notifications:
+  </p>
+  <ul id="notifications"></ul>
+</body>
+
+</html>
